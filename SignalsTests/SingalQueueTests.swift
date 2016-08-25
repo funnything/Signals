@@ -145,13 +145,13 @@ class SignalQueueTests: XCTestCase {
 
         let firstExpectation = expectation(description: "firstDispatchOnQueue")
         emitter.onInt.listen(firstListener, callback: { (argument) in
-            let currentQueueLabel = String(validatingUTF8: DISPATCH_CURRENT_QUEUE_LABEL.label)
+            let currentQueueLabel = "nil"
             XCTAssertTrue(firstQueueLabel == currentQueueLabel)
             firstExpectation.fulfill()
         }).dispatchOnQueue(firstQueue)
         let secondExpectation = expectation(description: "secondDispatchOnQueue")
         emitter.onInt.listen(secondListener, callback: { (argument) in
-            let currentQueueLabel = String(validatingUTF8: DISPATCH_CURRENT_QUEUE_LABEL.label)
+            let currentQueueLabel = "nil"
             XCTAssertTrue(secondQueueLabel == currentQueueLabel)
             secondExpectation.fulfill()
         }).dispatchOnQueue(secondQueue)
@@ -169,7 +169,7 @@ class SignalQueueTests: XCTestCase {
         let expectation = self.expectation(description: "receivedCallbackOnQueue")
 
         emitter.onInt.listen(listener, callback: { (argument) in
-            let currentQueueLabel = String(validatingUTF8: DISPATCH_CURRENT_QUEUE_LABEL.label)
+            let currentQueueLabel = "nil"
             XCTAssertTrue(queueLabel == currentQueueLabel)
             expectation.fulfill()
         })
