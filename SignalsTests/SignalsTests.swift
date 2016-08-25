@@ -398,7 +398,7 @@ class SignalsTests: XCTestCase {
     }
 
     func testPerformanceFiring() {
-        self.measureBlock() {
+        self.measure() {
             var dispatchCount = 0
             for _ in 0..<10 {
                 self.emitter.onIntAndString.listen(self) { (argument1, argument2) -> Void in
