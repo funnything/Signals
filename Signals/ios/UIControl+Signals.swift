@@ -189,36 +189,34 @@ public extension UIControl {
         return createSignalForUIGestureReconizer(gestureRecognizer)
     }
 
-    private struct GestureRecognizerAssociatedKeys {
-        static var SignalArrayKey = "signals_gestureRecognizer_signalArrayKey"
-    }
-
     private func createSignalForUIGestureReconizer(_ gestureRecognizer: UIGestureRecognizer) -> Signal<UIGestureRecognizer> {
-        let dictionary = getOrCreateAssociatedObject(self, associativeKey: &AssociatedKeys.SignalDictionaryKey, defaultValue: NSMutableDictionary(), policy: objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        let array = getOrCreateAssociatedObject(self, associativeKey: &GestureRecognizerAssociatedKeys.SignalArrayKey, defaultValue: NSMutableArray(), policy: objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-
         let signal = Signal<UIGestureRecognizer>()
-        let key = NSUUID().uuidString
-        array.add((key, gestureRecognizer))
-        dictionary[key] = signal
+        gestureRecognizerSignals.add((gestureRecognizer, signal))
+
         gestureRecognizer.addTarget(self, action: #selector(eventHandlerGestureRecognizer(_:)))
         addGestureRecognizer(gestureRecognizer)
+
         return signal
     }
 
-    @objc private dynamic func eventHandlerGestureRecognizer(_ sender: UIGestureRecognizer) {
-        typealias ArrayItem = (key: String, gestureRecognizer: UIGestureRecognizer)
+    private var gestureRecognizerSignals: NSMutableArray {
+        let key = "GestureRecognizerSignals"
 
         let dictionary = getOrCreateAssociatedObject(self, associativeKey: &AssociatedKeys.SignalDictionaryKey, defaultValue: NSMutableDictionary(), policy: objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        let array = getOrCreateAssociatedObject(self, associativeKey: &GestureRecognizerAssociatedKeys.SignalArrayKey, defaultValue: NSMutableArray(), policy: objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
-        let key = (array.first {
-            let pair = $0 as! ArrayItem
-            return pair.gestureRecognizer == sender
-        } as! ArrayItem).key
+        if let gestures = dictionary[key] as? NSMutableArray {
+            return gestures
+        }
 
-        let signal = dictionary[key] as! Signal<UIGestureRecognizer>
-        signal.fire(sender)
+        let gestures = NSMutableArray()
+        dictionary[key] = gestures
+        return gestures
+    }
+
+    @objc private dynamic func eventHandlerGestureRecognizer(_ sender: UIGestureRecognizer) {
+        typealias ArrayItem = (gestureRecognizer: UIGestureRecognizer, signal: Signal<UIGestureRecognizer>)
+
+        (gestureRecognizerSignals as! [ArrayItem]).first { $0.gestureRecognizer == sender }!.signal.fire(sender)
     }
 }
 
