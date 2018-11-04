@@ -184,9 +184,13 @@ extension UIControl.Event: Hashable {
     }
 }
 
-public extension UIControl {
+public extension UIView {
     public func addGestureRecognizerForSignal(_ gestureRecognizer: UIGestureRecognizer) -> Signal<UIGestureRecognizer> {
         return createSignalForUIGestureReconizer(gestureRecognizer)
+    }
+
+    private struct AssociatedKeys {
+        static var SignalDictionaryKey = "signals_signalKey"
     }
 
     private func createSignalForUIGestureReconizer(_ gestureRecognizer: UIGestureRecognizer) -> Signal<UIGestureRecognizer> {
