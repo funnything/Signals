@@ -84,36 +84,35 @@ public extension UIControl {
         static var SignalDictionaryKey = "signals_signalKey"
     }
 
-    private static let eventToKey: [UIControl.Event: NSString] = [
-        .touchDown: "TouchDownSender:forEvent:",
-        .touchDownRepeat: "TouchDownRepeatSender:forEvent:",
-        .touchDragInside: "TouchDragInsideSender:forEvent:",
-        .touchDragOutside: "TouchDragOutsideSender:forEvent:",
-        .touchDragEnter: "TouchDragEnterSender:forEvent:",
-        .touchDragExit: "TouchDragExitSender:forEvent:",
-        .touchUpInside: "TouchUpInsideSender:forEvent:",
-        .touchUpOutside: "TouchUpOutsideSender:forEvent:",
-        .touchCancel: "TouchCancelSender:forEvent:",
-        .valueChanged: "ValueChangedSender:forEvent:",
-        .editingDidBegin: "EditingDidBeginSender:forEvent:",
-        .editingChanged: "EditingChangedSender:forEvent:",
-        .editingDidEnd: "EditingDidEndSender:forEvent:",
-        .editingDidEndOnExit: "EditingDidEndOnExitSender:forEvent:"
-    ]
+    private func eventToSelector(_ event: UIControl.Event) -> Selector {
+        switch event {
+        case .touchDown: return #selector(eventHandlerTouchDown(sender:forEvent:))
+        case .touchDownRepeat: return #selector(eventHandlerTouchDownRepeat(sender:forEvent:))
+        case .touchDragInside: return #selector(eventHandlerTouchDragInside(sender:forEvent:))
+        case .touchDragOutside: return #selector(eventHandlerTouchDragOutside(sender:forEvent:))
+        case .touchDragEnter: return #selector(eventHandlerTouchDragEnter(sender:forEvent:))
+        case .touchDragExit: return #selector(eventHandlerTouchDragExit(sender:forEvent:))
+        case .touchUpInside: return #selector(eventHandlerTouchUpInside(sender:forEvent:))
+        case .touchUpOutside: return #selector(eventHandlerTouchUpOutside(sender:forEvent:))
+        case .touchCancel: return #selector(eventHandlerTouchCancel(sender:forEvent:))
+        case .valueChanged: return #selector(eventHandlerValueChanged(sender:forEvent:))
+        case .editingDidBegin: return #selector(eventHandlerEditingDidBegin(sender:forEvent:))
+        case .editingChanged: return #selector(eventHandlerEditingChanged(sender:forEvent:))
+        case .editingDidEnd: return #selector(eventHandlerEditingDidEnd(sender:forEvent:))
+        case .editingDidEndOnExit: return #selector(eventHandlerEditingDidEndOnExit(sender:forEvent:))
+        default: fatalError("Unknown event: \(event)")
+        }
+    }
 
     private func getOrCreateSignalForUIControlEvent(_ event: UIControl.Event) -> Signal<UIEvent?> {
-        guard let key = UIControl.eventToKey[event] else {
-            assertionFailure("Event type is not handled")
-            return Signal()
-        }
         let dictionary = getOrCreateAssociatedObject(self, associativeKey: &AssociatedKeys.SignalDictionaryKey, defaultValue: NSMutableDictionary(), policy: objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
-        if let signal = dictionary[key] as? Signal<UIEvent?> {
+        if let signal = dictionary[event] as? Signal<UIEvent?> {
             return signal
         } else {
             let signal = Signal<UIEvent?>()
-            dictionary[key] = signal
-            self.addTarget(self, action: Selector("eventHandler\(key)"), for: event)
+            dictionary[event] = signal
+            self.addTarget(self, action: eventToSelector(event), for: event)
             return signal
         }
     }
