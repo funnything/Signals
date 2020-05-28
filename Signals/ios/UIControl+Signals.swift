@@ -9,72 +9,72 @@ import UIKit
 /// Extends UIControl with signals for all ui control events.
 public extension UIControl {
     /// A signal that fires for each touch down control event.
-    var onTouchDown: Signal<UIEvent> {
+    var onTouchDown: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchDown)
     }
 
     /// A signal that fires for each touch down repeat control event.
-    var onTouchDownRepeat: Signal<UIEvent> {
+    var onTouchDownRepeat: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchDownRepeat)
     }
 
     /// A signal that fires for each touch drag inside control event.
-    var onTouchDragInside: Signal<UIEvent> {
+    var onTouchDragInside: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchDragInside)
     }
 
     /// A signal that fires for each touch drag outside control event.
-    var onTouchDragOutside: Signal<UIEvent> {
+    var onTouchDragOutside: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchDragOutside)
     }
 
     /// A signal that fires for each touch drag enter control event.
-    var onTouchDragEnter: Signal<UIEvent> {
+    var onTouchDragEnter: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchDragEnter)
     }
 
     /// A signal that fires for each touch drag exit control event.
-    var onTouchDragExit: Signal<UIEvent> {
+    var onTouchDragExit: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchDragExit)
     }
 
     /// A signal that fires for each touch up inside control event.
-    var onTouchUpInside: Signal<UIEvent> {
+    var onTouchUpInside: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchUpInside)
     }
 
     /// A signal that fires for each touch up outside control event.
-    var onTouchUpOutside: Signal<UIEvent> {
+    var onTouchUpOutside: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchUpOutside)
     }
 
     /// A signal that fires for each touch cancel control event.
-    var onTouchCancel: Signal<UIEvent> {
+    var onTouchCancel: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.touchCancel)
     }
 
     /// A signal that fires for each value changed control event.
-    var onValueChanged: Signal<UIEvent> {
+    var onValueChanged: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.valueChanged)
     }
 
     /// A signal that fires for each editing did begin control event.
-    var onEditingDidBegin: Signal<UIEvent> {
+    var onEditingDidBegin: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.editingDidBegin)
     }
 
     /// A signal that fires for each editing changed control event.
-    var onEditingChanged: Signal<UIEvent> {
+    var onEditingChanged: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.editingChanged)
     }
 
     /// A signal that fires for each editing did end control event.
-    var onEditingDidEnd: Signal<UIEvent> {
+    var onEditingDidEnd: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.editingDidEnd)
     }
 
     /// A signal that fires for each editing did end on exit control event.
-    var onEditingDidEndOnExit: Signal<UIEvent> {
+    var onEditingDidEndOnExit: Signal<UIEvent?> {
         return getOrCreateSignalForUIControlEvent(.editingDidEndOnExit)
     }
 
@@ -101,80 +101,80 @@ public extension UIControl {
         .editingDidEndOnExit: "EditingDidEndOnExitSender:forEvent:"
     ]
 
-    private func getOrCreateSignalForUIControlEvent(_ event: UIControl.Event) -> Signal<UIEvent> {
+    private func getOrCreateSignalForUIControlEvent(_ event: UIControl.Event) -> Signal<UIEvent?> {
         guard let key = UIControl.eventToKey[event] else {
             assertionFailure("Event type is not handled")
             return Signal()
         }
         let dictionary = getOrCreateAssociatedObject(self, associativeKey: &AssociatedKeys.SignalDictionaryKey, defaultValue: NSMutableDictionary(), policy: objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
-        if let signal = dictionary[key] as? Signal<UIEvent> {
+        if let signal = dictionary[key] as? Signal<UIEvent?> {
             return signal
         } else {
-            let signal = Signal<UIEvent>()
+            let signal = Signal<UIEvent?>()
             dictionary[key] = signal
             self.addTarget(self, action: Selector("eventHandler\(key)"), for: event)
             return signal
         }
     }
 
-    private func handleUIControlEvent(_ uiControlEvent: UIControl.Event, event: UIEvent) {
+    private func handleUIControlEvent(_ uiControlEvent: UIControl.Event, event: UIEvent?) {
         getOrCreateSignalForUIControlEvent(uiControlEvent).fire(event)
     }
 
-    @objc private dynamic func eventHandlerTouchDown(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchDown(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchDown, event: event)
     }
 
-    @objc private dynamic func eventHandlerTouchDownRepeat(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchDownRepeat(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchDownRepeat, event: event)
     }
 
-    @objc private dynamic func eventHandlerTouchDragInside(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchDragInside(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchDragInside, event: event)
     }
 
-    @objc private dynamic func eventHandlerTouchDragOutside(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchDragOutside(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchDragOutside, event: event)
     }
 
-    @objc private dynamic func eventHandlerTouchDragEnter(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchDragEnter(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchDragEnter, event: event)
     }
 
-    @objc private dynamic func eventHandlerTouchDragExit(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchDragExit(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchDragExit, event: event)
     }
 
-    @objc private dynamic func eventHandlerTouchUpInside(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchUpInside(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchUpInside, event: event)
     }
 
-    @objc private dynamic func eventHandlerTouchUpOutside(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchUpOutside(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchUpOutside, event: event)
     }
 
-    @objc private dynamic func eventHandlerTouchCancel(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerTouchCancel(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.touchCancel, event: event)
     }
 
-    @objc private dynamic func eventHandlerValueChanged(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerValueChanged(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.valueChanged, event: event)
     }
 
-    @objc private dynamic func eventHandlerEditingDidBegin(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerEditingDidBegin(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.editingDidBegin, event: event)
     }
 
-    @objc private dynamic func eventHandlerEditingChanged(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerEditingChanged(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.editingChanged, event: event)
     }
 
-    @objc private dynamic func eventHandlerEditingDidEnd(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerEditingDidEnd(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.editingDidEnd, event: event)
     }
 
-    @objc private dynamic func eventHandlerEditingDidEndOnExit(sender: UIControl, forEvent event: UIEvent) {
+    @objc private dynamic func eventHandlerEditingDidEndOnExit(sender: UIControl, forEvent event: UIEvent?) {
         handleUIControlEvent(.editingDidEndOnExit, event: event)
     }
 }
